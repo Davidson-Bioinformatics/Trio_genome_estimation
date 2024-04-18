@@ -1,0 +1,109 @@
+---
+title: "Trio Jellyfish Analysis"
+author: "D T-S"
+date: "2024-04-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this exercise you will look at histograms of k-mer frequency with different
+sequencing methodologies to determine the genome coverage and approximate genome size. 
+
+
+Previously, we had run the program Jellyfish (Marcais et al, 2011) with a K-mer
+size of 17 on the Oxford Nanopore reads. What we should expect to see is a histogram
+with a distinct peak which would relate to the coverage. Let's take a look at the data.
+Jellyfish outputs a file with how many times (the frequency) a K-mer was found.
+
+Read in the file "uncorrected_nanopore.histo" file as a datafram in R:
+```{r cars}
+uncorrected_nano_histo <- read.table("uncorrected_nanopore.histo.txt")
+```
+
+Click on the file in the lobal environment. This is a table where it says a 
+k-mer of size 17 was found once 1923260959 times. And so on. Let's graph this data
+so we can look at it. We are going to zoom in on the left portion of the graph of 
+the first 200 data points.:
+
+```{r}
+plot(uncorrected_nano_histo[1:200,], type = "l", xlab = "Number of occurences of a K-mer",ylab = "frequency")
+```
+######Interpret this graph######
+(1) Does the histogram look like you expected? Why or why not?
+(2) Where is the largest peak - ie what is the number of times a K-mer most often appeared?
+(3) This K-mer counting occured on the nanopore reads which we say had low quality 
+and a high error rate. Why do you think low quality sequence might lead to a graph like the
+one above and not be useful for K-mer frequency counting? 
+
+
+Because nanopore long reads have a high error rate, the program Canu can help to generate
+corrected reads. This means that using the parts of the reads that overlap, Canu tries to 
+determine the correct sequence and generate higher quality reads that can be assembled.
+This read correction program was run on the nanopore reads. Let's see if it helped:
+
+Read in the file "uncorrected_nanopore.histo" file as a dataframe in R altering how we did it above:
+
+```{r}
+corrected_nano_histo <- read.table("corrected_nanopore.histo .txt")
+```
+
+Again peak at the file and make sure it read in correctly. Then using the code above 
+generate a plot for the corrected reads. 
+
+```{r}
+plot(corrected_nano_histo[1:200,], type = "l", xlab = "Number of occurences of a K-mer",ylab = "frequency")
+```
+
+######Interpret this graph######
+(1) How does this graph compare to the original, uncorrected graph? 
+
+
+The part of the plot function that is in square brackets says what data points to plot (the x-axis 
+- what below is question marks). Generally, low-frequency K-mers may skew the Y-axis and make it hard to 
+see if there is a peak. Alter the plot and play with the x-axis to see if there seems to be a 
+peak denoting likely coverage. 
+
+```{r}
+plot(corrected_nano_histo[????], type = "l", xlab = "Number of occurences of a K-mer",ylab = "frequency")
+```
+
+
+
+Between looking at this zoomed in plot and the file itself (can see the actual numbers!), estimate the coverage. Set
+this value equal to C_nano
+
+```{r}
+#C_nano = where_peak_is_X_axis
+C_nano = 15
+```
+
+
+Determine the total number of data points (ie scroll down in the file to see the 
+total number of data points). Use this number to count up all the lines, excluding 
+those K-mers that only occur once to get the total numer of K-mers:
+
+```{r}
+n_nano = sum(as.numeric(corrected_nano_histo[2:10001,1]*corrected_nano_histo[2:10001,2]))
+n_nano
+```
+
+Genome size estimate:
+```{r}
+genome_size = n_nano/C_nano
+genome_size
+```
+
+
+Now do the same analysis with the illumina reads. The Jellyfish output on the 
+illumina reads with a K-mer size of 17 is called "17mer_out_illumina.txt".
+Generate the histogram, using our judgement on the appropriate x-axis. Estimate the genome
+size as above (hint when looking at the plot zoom all the way out there is a spike 
+at 10001 (the last data point) that when counting total K-mer number should be omitted). 
+Compare it with the results you got for the corrected nanopore reads.
+How do these genome size estimations compare to the sequenced genomes in this family?
+What are limitations to this genome size estimate? Do you think using 17-mer as the 
+K-mer size is a good choice? How would you like to present this data in your 
+micropub figure?
